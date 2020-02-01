@@ -2,10 +2,10 @@ module.exports = app => {
     const express = require('express')
     const router = express.Router()
 
-    const Category = require('../../models/Category')
+    // const Category = require('../../models/Category')
 
     // 新建分类
-    router.post('/categories', async (req, res) => {
+    router.post('/', async (req, res) => {
         if (!req.body.name) {
             return res.send({
                 success: false,
@@ -13,33 +13,48 @@ module.exports = app => {
                 status: 200
             })
         }
-        const model = await Category.create(req.body)
+        const model = await req.Model.create(req.body)
         res.send(model)
     })
     // 获取分类
-    router.get('/categories', async (req, res) => {
+    router.get('/', async (req, res) => {
+        // 因为不是所有的都有父级分类，所以改为条件选择
+        let queryOptions = {}
+        if (req.Model.modelName === 'Category') {
+            queryOptions.populate = 'parent'
+        } else {
+            queryOptions = {}
+        }
         // 获取分类并且将其父级分类对象形式返回限制10条
-        const items = await Category.find().populate('parent').limit(10)
+        const items = await req.Model.find().setOptions(queryOptions).limit(10)
         res.send(items)
     })
     // 获取分类根据ObjectId
-    router.get('/categories/:id', async (req, res) => {
-        const model = await Category.findById(req.params.id)
+    router.get('/:id', async (req, res) => {
+        const model = await req.Model.findById(req.params.id)
         res.send(model)
     })
     // 根据Id获取分类名称并且修改
-    router.put('/categories/:id', async (req, res) => {
-        const model = await Category.findByIdAndUpdate(req.params.id, req.body)
+    router.put('/:id', async (req, res) => {
+        const model = await req.Model.findByIdAndUpdate(req.params.id, req.body)
         res.send(model)
     })
     // 根据Id获取分类名称并且删除
-    router.delete('/categories/:id', async (req, res) => {
-        await Category.findByIdAndDelete(req.params.id)
+    router.delete('/:id', async (req, res) => {
+        await req.Model.findByIdAndDelete(req.params.id)
         res.send({
             success: true,
             data: null
         })
     })
 
-    app.use('/admin', router)
+    // 通用CRUD写法
+    app.use('/admin/rest/:resource', async (req, res, next) => {
+        // 因为获取的是资源复数，想要获取对应的模式单数，引用inflection包
+        const modelName = require('inflection').classify(req.params.resource)
+        // 挂载到req上
+        req.Model = require(`../../models/${modelName}`)
+        // 继续执行express插件
+        next()
+    }, router)
 }

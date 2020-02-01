@@ -1,7 +1,8 @@
 <template>
     <div>
+        <el-button type='text' v-show="this.id" @click="$router.push('/categories/list')">返回</el-button>
         <h1>{{id ? '编辑' : '新建'}}分类</h1>
-        <el-form label-width='120px' @submit.native.prevent="save">
+        <el-form ref="categoriesForm" :model='model' label-width='120px' @submit.native.prevent="save">
             <el-form-item label='上级分类'>
                 <el-select v-model="model.parent">
                     <el-option
@@ -39,6 +40,14 @@
         created() {
             this.fetchParents()
             this.id  && this.fetch()
+        },
+        // 当新建分类的时候将原来获取的表单数据清空
+        watch: {
+            id(val) {
+                if (!val) {
+                    this.model = {}
+                }
+            }
         },
         methods: {
             // async await写法
