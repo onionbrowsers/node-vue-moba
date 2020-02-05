@@ -6,6 +6,8 @@ const app = express()
 app.use(require('cors')())
 // 解析body
 app.use(express.json())
+// 开放静态文件
+app.use('/uploads', express.static(__dirname + '/uploads'))
 
 // 获取数据库
 require('./plugins/db')(app)

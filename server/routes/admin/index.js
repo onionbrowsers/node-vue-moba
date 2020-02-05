@@ -57,4 +57,17 @@ module.exports = app => {
         // 继续执行express插件
         next()
     }, router)
+
+    // 上传图片的接口编写
+    const path = require('path')
+    // express提供的上传图片的中间件
+    const multer = require('multer')
+    // 设置上传的图片保存的文件路径
+    const upload = multer({dest: path.join(__dirname, '../../uploads')})
+    // 接口编写，single是代表上传单张图片，也可.Array上传多张
+    app.post('/admin/upload', upload.single('file'), async (req, res) => {
+        const file = req.file
+        file.url = `http://localhost:3000/uploads/${file.filename}`
+        res.send(file)
+    })
 }

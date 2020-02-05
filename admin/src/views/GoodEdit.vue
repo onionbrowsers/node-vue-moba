@@ -6,8 +6,16 @@
             <el-form-item label='名称'>
                 <el-input v-model="model.name"></el-input>
             </el-form-item>
+            <!-- 上传图标 -->
             <el-form-item label='图标'>
-                <el-input v-model="model.icon"></el-input>
+                <el-upload
+                    class="avatar-uploader"
+                    :action="uploadUrl + '/upload'"
+                    :show-file-list="false"
+                    :on-success="afterUpload">
+                    <img v-if="model.icon" :src="model.icon" class="avatar">
+                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
             </el-form-item>
             <el-form-item>
                 <el-button type='primary' native-type='submit'>保存</el-button>
@@ -30,6 +38,7 @@
             }
         },
         created() {
+            this.uploadUrl = this.$http.defaults.baseURL.replace('/rest', '')
             this.id && this.fetch()
         },
         // 当新建物品的时候将原来获取的表单数据清空
@@ -41,6 +50,10 @@
             }
         },
         methods: {
+            // 成功的回调函数
+            afterUpload(res) {
+                this.$set(this.model, 'icon', res.url)
+            },
             // async await写法
             async save() {
                 let res
@@ -61,6 +74,28 @@
     }
 </script>
 
-<style lang="scss" scoped>
-
+<style>
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+    }
+    .avatar {
+        width: 100px;
+        height: 100px;
+        display: block;
+    }
 </style>
