@@ -6,13 +6,13 @@ module.exports = app => {
 
     // 新建分类
     router.post('/', async (req, res) => {
-        if (!req.body.name) {
-            return res.send({
-                success: false,
-                message: '名称必须填写',
-                status: 200
-            })
-        }
+        // if (!req.body.name) {
+        //     return res.send({
+        //         success: false,
+        //         message: '名称必须填写',
+        //         status: 200
+        //     })
+        // }
         const model = await req.Model.create(req.body)
         res.send(model)
     })
@@ -22,6 +22,9 @@ module.exports = app => {
         let queryOptions = {}
         if (req.Model.modelName === 'Category') {
             queryOptions.populate = 'parent'
+        } else if (req.Model.modelName === 'Article') {
+            const Category = require('../../models/Category')
+            queryOptions.populate = 'categories'
         } else {
             queryOptions = {}
         }
@@ -70,4 +73,42 @@ module.exports = app => {
         file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)
     })
+
+    // 登录接口
+    app.post('/admin/login', async (req, res) => {
+        const {username, password} = req.body
+        // 1. 根据用户名找用户
+        const User = require('../../models/AdminUser')
+        // 因为密码是不可选取的所以想要选择密码就需要前面加上+
+        const user = await User.findOne({username}).select('+password')
+        if (!user) {
+            // 用户不存在的返回
+            return res.status(422).send({
+                message: '该用户不存在'
+            })
+        }
+        // 2. 校验密码
+        // 根据使用的bcrypt的包比较用户账号密码是否配对的上
+        const isValid = require('bcrypt').compareSync(password, user.password)
+        if (!isValid) {
+            // 用户密码错误的返回
+            return res.status(422).send({
+                message: '密码错误'
+            })
+        }
+        // 3. 返回token
+        // jsonwebtoken设置token的值
+        const jwt = require('jsonwebtoken')
+        // 自定义设置把什么东西加在token中
+        const token = jwt.sign({
+            id: user._id,
+            username: user.username
+        }, app.get('secret'))
+        res.send({
+            token,
+            username: user.username,
+            message: '登录成功'
+        })
+    })
+
 }

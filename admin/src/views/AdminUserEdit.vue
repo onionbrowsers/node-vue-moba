@@ -1,20 +1,14 @@
 <template>
     <div>
-        <el-button type='text' v-show="this.id" @click="$router.push('/categories/list')">返回</el-button>
-        <h1>{{id ? '编辑' : '新建'}}分类</h1>
+        <!-- 管理员页面 -->
+        <el-button type='text' v-show="this.id" @click="$router.push('/admin_users/list')">返回</el-button>
+        <h1>{{id ? '编辑' : '新建'}}管理员</h1>
         <el-form ref="categoriesForm" :model='model' label-width='120px' @submit.native.prevent="save">
-            <el-form-item label='上级分类'>
-                <el-select v-model="model.parent">
-                    <el-option
-                        v-for="item in parents"
-                        :key="item._id"
-                        :label='item.name'
-                        :value='item._id'>
-                    </el-option>
-                </el-select>
+            <el-form-item label='用户名'>
+                <el-input v-model="model.username"></el-input>
             </el-form-item>
-            <el-form-item label='名称'>
-                <el-input v-model="model.name"></el-input>
+            <el-form-item label='密码'>
+                <el-input type='password' v-model="model.password"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type='primary' native-type='submit'>保存</el-button>
@@ -33,12 +27,10 @@
         },
         data() {
             return {
-                model: {},
-                parents: []
+                model: {}
             }
         },
         created() {
-            this.fetchParents()
             this.id  && this.fetch()
         },
         // 当新建分类的时候将原来获取的表单数据清空
@@ -54,23 +46,18 @@
             async save() {
                 let res
                 if (this.id) {
-                    res = await this.$http.put('categories/' + this.id, this.model)
+                    res = await this.$http.put('admin_users/' + this.id, this.model)
                 } else {
-                    res = await this.$http.post('categories', this.model)
+                    res = await this.$http.post('admin_users', this.model)
                 }
                 console.log(res)
-                this.$router.push('/categories/list')
+                this.$router.push('/admin_users/list')
                 this.$message.success('保存成功')
             },
             async fetch() {
-                const res = await this.$http.get('categories/' + this.id)
+                const res = await this.$http.get('admin_users/' + this.id)
                 this.model = res.data
-            },
-            // 获取上级菜单，用于下拉框
-            async fetchParents() {
-                const res = await this.$http.get('categories/')
-                this.parents = res.data
-            },
+            }
         },
     }
 </script>

@@ -3,7 +3,7 @@
         <el-button type='text' v-show="this.id" @click="$router.push('/heros/list')">返回</el-button>
         <h1>{{id ? '编辑' : '新建'}}英雄</h1>
         <el-form :model="model" ref="goodsForm" label-width='120px' @submit.native.prevent="save">
-            <el-tabs type='border-card' value='skill'>
+            <el-tabs type='border-card' value='basic'>
                 <el-tab-pane label='基础信息' name='basic'>
                     <el-form-item label='名称'>
                         <el-input v-model="model.name"></el-input>
@@ -81,10 +81,10 @@
                                 </el-upload>
                             </el-form-item>
                             <el-form-item label='描述'>
-                                <el-input v-model="item.description" type='textarea'></el-input>
+                                <el-input v-model="item.description" type='textarea' :autosize='{minRows: 3}'></el-input>
                             </el-form-item>
                             <el-form-item label='小提示'>
-                                <el-input v-model="item.tips" type='textarea'></el-input>
+                                <el-input v-model="item.tips" type='textarea' :autosize='{minRows: 3}'></el-input>
                             </el-form-item>
                             <el-form-item>
                                 <el-button size='small' type='danger' @click="model.skills.splice(index, 1)">删除</el-button>
@@ -168,32 +168,3 @@
         },
     }
 </script>
-
-<style>
-    .avatar-uploader .el-upload {
-        border: 1px dashed #d9d9d9;
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-    .avatar-uploader .el-upload:hover {
-        border-color: #409EFF;
-    }
-    .avatar-uploader-icon {
-        font-size: 28px;
-        color: #8c939d;
-        width: 5rem;
-        height: 5rem;
-        line-height: 5rem;
-        text-align: center;
-    }
-    .avatar {
-        width: 5rem;
-        height: 5rem;
-        display: block;
-    }
-    .el-test .el-form-item__content {
-        margin-left: 0 !important
-    }
-</style>

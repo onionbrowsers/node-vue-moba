@@ -2,6 +2,9 @@ const express = require('express')
 
 const app = express()
 
+// express的方法设置键值对在原型上，类似于map或者set
+app.set('secret', 'wodediyigetoken')
+
 // 解决跨域
 app.use(require('cors')())
 // 解析body

@@ -6,4 +6,12 @@ const http = axios.create({
     baseURL: 'http://localhost:3000/admin/rest'
 })
 
+// 添加接口请求拦截器
+http.interceptors.response.use(res => {
+    return res
+}, err => {
+    console.log(err)
+    return Promise.reject(err)
+})
+
 export default http
