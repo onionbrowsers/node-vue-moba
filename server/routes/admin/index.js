@@ -1,6 +1,12 @@
 module.exports = app => {
     const express = require('express')
+    const jwt = require('jsonwebtoken')
+    const User = require('../../models/AdminUser')
+    // 三个参数，第一个用来判断是否有第一个参数，第二个返回http状态码，第三个是返回错误信息
+    const assert = require('http-assert')
     const router = express.Router()
+
+    const authMiddleware = require('../../middleware/auth')
 
     // const Category = require('../../models/Category')
 
@@ -52,7 +58,7 @@ module.exports = app => {
     })
 
     // 通用CRUD写法
-    app.use('/admin/rest/:resource', async (req, res, next) => {
+    app.use('/admin/rest/:resource', authMiddleware(), async (req, res, next) => {
         // 因为获取的是资源复数，想要获取对应的模式单数，引用inflection包
         const modelName = require('inflection').classify(req.params.resource)
         // 挂载到req上
@@ -68,7 +74,7 @@ module.exports = app => {
     // 设置上传的图片保存的文件路径
     const upload = multer({dest: path.join(__dirname, '../../uploads')})
     // 接口编写，single是代表上传单张图片，也可.Array上传多张
-    app.post('/admin/upload', upload.single('file'), async (req, res) => {
+    app.post('/admin/upload', authMiddleware(), upload.single('file'), async (req, res) => {
         const file = req.file
         file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)
@@ -78,27 +84,27 @@ module.exports = app => {
     app.post('/admin/login', async (req, res) => {
         const {username, password} = req.body
         // 1. 根据用户名找用户
-        const User = require('../../models/AdminUser')
         // 因为密码是不可选取的所以想要选择密码就需要前面加上+
         const user = await User.findOne({username}).select('+password')
-        if (!user) {
-            // 用户不存在的返回
-            return res.status(422).send({
-                message: '该用户不存在'
-            })
-        }
+        assert(user, 422, '该用户不存在')
+        // if (!user) {
+        //     // 用户不存在的返回
+        //     return res.status(422).send({
+        //         message: '该用户不存在'
+        //     })
+        // }
         // 2. 校验密码
         // 根据使用的bcrypt的包比较用户账号密码是否配对的上
         const isValid = require('bcrypt').compareSync(password, user.password)
-        if (!isValid) {
-            // 用户密码错误的返回
-            return res.status(422).send({
-                message: '密码错误'
-            })
-        }
+        assert(isValid, 422, '密码错误')
+        // if (!isValid) {
+        //     // 用户密码错误的返回
+        //     return res.status(422).send({
+        //         message: '密码错误'
+        //     })
+        // }
         // 3. 返回token
         // jsonwebtoken设置token的值
-        const jwt = require('jsonwebtoken')
         // 自定义设置把什么东西加在token中
         const token = jwt.sign({
             id: user._id,
@@ -110,5 +116,12 @@ module.exports = app => {
             message: '登录成功'
         })
     })
-
+    
+    // 全局错误处理函数
+    app.use(async (err, req, res, next) => {
+        console.dir(err)
+        res.status(err.status || 500).send({
+            message: err.message
+        })
+    })
 }

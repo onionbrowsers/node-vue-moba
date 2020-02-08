@@ -15,6 +15,7 @@
                         <el-upload
                             class="avatar-uploader"
                             :action="uploadUrl + '/upload'"
+                            :headers='getAuthHeaders()'
                             :show-file-list="false"
                             :on-success="afterUpload">
                             <img v-if="model.avatar" :src="model.avatar" class="avatar">

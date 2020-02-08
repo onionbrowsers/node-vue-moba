@@ -9,6 +9,9 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue'),
+    meta: {
+      isPublic: true
+    }
   },
   {
     path: '/',
@@ -130,6 +133,14 @@ const routes = [
 
 const router = new VueRouter({
   routes
+})
+
+// 全局路由判断是否有token并且是否在白名单内
+router.beforeEach((to, from, next) => {
+  if (!to.meta.isPublic && !localStorage.token) {
+    return next('/login')
+  }
+  next()
 })
 
 export default router

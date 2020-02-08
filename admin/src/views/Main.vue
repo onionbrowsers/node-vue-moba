@@ -1,7 +1,7 @@
 <template>
     <el-container style="height: 100vh;">
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-            <el-menu router :default-openeds="['2']" :unique-opened='true' :default-active='$route.path'>
+            <el-menu router @open='openMenu' :default-openeds="openMenuArr" :default-active='$route.path'>
                 <el-submenu index="1">
                     <template slot="title"><i class="el-icon-message"></i>内容管理</template>
                     <!-- 新增物品菜单 -->
@@ -83,7 +83,15 @@
 <script>
   export default {
     data() {
-      return {}
-    }
+      return {
+        openMenuArr: []
+      }
+    },
+    methods: {
+      // 设置默认打开的菜单
+      openMenu(index) {
+        this.openMenuArr = [index]
+      }
+    },
   };
 </script>

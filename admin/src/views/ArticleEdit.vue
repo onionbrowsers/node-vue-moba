@@ -49,6 +49,15 @@
         created() {
             this.fetchCategories()
             this.id  && this.fetch()
+            // 脑瘫了只能继续脑瘫
+            axios.interceptors.request.use(config => {
+                if (localStorage.token) {
+                    config.headers.Authorization = 'Bearer ' + localStorage.token
+                }
+                return config
+            }, error => {
+                return Promise.reject(error)
+            })
         },
         // 当新建分类的时候将原来获取的表单数据清空
         watch: {
