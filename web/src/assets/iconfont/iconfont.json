@@ -1,0 +1,44 @@
+{
+  "id": "1634885",
+  "name": "node-vue-moba",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "472606",
+      "name": "book",
+      "font_class": "book",
+      "unicode": "e634",
+      "unicode_decimal": 58932
+    },
+    {
+      "icon_id": "1550866",
+      "name": "省略号",
+      "font_class": "ellipsis",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "3042420",
+      "name": "video",
+      "font_class": "video",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "3223127",
+      "name": "menu",
+      "font_class": "menu",
+      "unicode": "e63d",
+      "unicode_decimal": 58941
+    },
+    {
+      "icon_id": "8360903",
+      "name": "Artifact-英雄",
+      "font_class": "heros",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    }
+  ]
+}

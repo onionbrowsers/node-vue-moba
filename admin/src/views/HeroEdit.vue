@@ -158,7 +158,11 @@
             },
             // 获取分类菜单的下拉数据
             async fetchCategories() {
-                const res = await this.$http.get('categories/')
+                const res = await this.$http.get('categories/', {
+                    params: {
+                        list: 'heros'
+                    }
+                })
                 this.categories = res.data
             },
             // 获取所有物品的下拉数据

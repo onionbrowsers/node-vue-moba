@@ -53,6 +53,9 @@
             // async await写法
             async save() {
                 let res
+                if (!this.model.parent) {
+                    delete this.model.parent
+                }
                 if (this.id) {
                     res = await this.$http.put('categories/' + this.id, this.model)
                 } else {
@@ -69,7 +72,12 @@
             // 获取上级菜单，用于下拉框
             async fetchParents() {
                 const res = await this.$http.get('categories/')
-                this.parents = res.data
+                // 本意是该分类无上级分类，有待改进
+                let arr = [{
+                    name: '无',
+                    _id: 0
+                }]
+                this.parents = arr.concat(res.data)
             },
         },
     }

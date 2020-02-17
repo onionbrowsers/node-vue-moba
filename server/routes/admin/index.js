@@ -8,7 +8,7 @@ module.exports = app => {
 
     const authMiddleware = require('../../middleware/auth')
 
-    // const Category = require('../../models/Category')
+    const Category = require('../../models/Category')
 
     // 新建分类
     router.post('/', async (req, res) => {
@@ -26,16 +26,43 @@ module.exports = app => {
     router.get('/', async (req, res) => {
         // 因为不是所有的都有父级分类，所以改为条件选择
         let queryOptions = {}
+        // 按树形结构返回
         if (req.Model.modelName === 'Category') {
-            queryOptions.populate = 'parent'
+            let items = await req.Model.find().populate([
+                {path: 'children'}
+            ]).lean()
+            items = items.filter(item => !item.parent)
+            return res.send(items)
         } else if (req.Model.modelName === 'Article') {
-            const Category = require('../../models/Category')
+            queryOptions.populate = 'categories'
+        } else if (req.Model.modelName === 'Hero') {
             queryOptions.populate = 'categories'
         } else {
             queryOptions = {}
         }
-        // 获取分类并且将其父级分类对象形式返回限制10条
-        const items = await req.Model.find().setOptions(queryOptions).limit(10)
+        // 如果get传参了，并且是article，就返回他的子菜单，heros也是如此
+        if (req.query.list) {
+            let items
+            switch (req.query.list) {
+                case 'article':
+                    items = await req.Model.findOne({
+                        name: '新闻资讯'
+                    }).populate({
+                        path: 'children'
+                    }).lean()
+                    break
+                case 'heros':
+                    items = await req.Model.findOne({
+                        name: '英雄'
+                    }).populate({
+                        path: 'children'
+                    }).lean()
+                    break
+            }
+            return res.send(items.children)
+        }
+        // 获取分类并且将其父级分类对象形式返回限制50条
+        const items = await req.Model.find().setOptions(queryOptions).limit(200)
         res.send(items)
     })
     // 获取分类根据ObjectId
@@ -50,6 +77,24 @@ module.exports = app => {
     })
     // 根据Id获取分类名称并且删除
     router.delete('/:id', async (req, res) => {
+        // 删除时先判断是否和其他数据有关联
+        if (req.Model.modelName === 'Category') {
+            // populate数组写法，就可以将两个虚拟属性都填充进去,
+            // lean方法是返回原始js数据，如果是返回的mongoose的document的话，无法查询出虚拟属性
+            // 也无法使用js方法添加属性
+            const cats = await req.Model.findById(req.params.id).populate([
+                {path: 'children'},
+                {path: 'newsList'},
+                {path: 'heroList'}
+            ]).lean()
+            console.log(cats)
+            if (cats.newsList.length > 0 || cats.children.length > 0 || cats.heroList.length > 0) {
+                return res.send({
+                    success: false,
+                    message: '该分类有关联，无法删除'
+                })
+            }
+        }
         await req.Model.findByIdAndDelete(req.params.id)
         res.send({
             success: true,
@@ -109,7 +154,10 @@ module.exports = app => {
         const token = jwt.sign({
             id: user._id,
             username: user.username
-        }, app.get('secret'))
+        }, app.get('secret'), {
+            // 过期时间可以写数字代表秒数，也可以写字符串，例如：'1min', '2 days', '10h', '7d'
+            expiresIn: '24h'
+        })
         res.send({
             token,
             username: user.username,
@@ -119,7 +167,12 @@ module.exports = app => {
     
     // 全局错误处理函数
     app.use(async (err, req, res, next) => {
-        console.dir(err)
+        // token过期返回的error message，改写一下
+        if (err.message === 'jwt expired') {
+            return res.status(401).send({
+                message: 'token失效，请重新登录'
+            })
+        }
         res.status(err.status || 500).send({
             message: err.message
         })

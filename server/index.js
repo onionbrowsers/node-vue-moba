@@ -16,6 +16,8 @@ app.use('/uploads', express.static(__dirname + '/uploads'))
 require('./plugins/db')(app)
 // 获取路由
 require('./routes/admin/index')(app)
+// 获取移动端接口路由
+require('./routes/web/index')(app)
 
 app.listen(3000, () => {
     console.log('启动成功')

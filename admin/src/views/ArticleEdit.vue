@@ -86,7 +86,12 @@
             },
             // 获取上级菜单，用于下拉框
             async fetchCategories() {
-                const res = await this.$http.get('categories/')
+                // 添加article参数，代表是查找新闻资讯下的菜单
+                const res = await this.$http.get('categories', {
+                    params: {
+                        list: 'article'
+                    }
+                })
                 this.categories = res.data
             },
             async handleImageAdded(file, Editor, cursorLocation, resetUploader) {

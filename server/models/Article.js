@@ -16,6 +16,9 @@ const schema = new mongoose.Schema({
     body: {
         type: String
     }
+}, {
+    // 时间戳，返回两个时间，第一个是创建时间，第二个是修改时间
+    timestamps: true
 })
 
 module.exports = mongoose.model('Article', schema)

@@ -14,4 +14,30 @@ const schema = new mongoose.Schema({
     }
 })
 
+// 虚拟属性
+schema.virtual('children', {
+    // 本地键
+    localField: '_id',
+    // 外键
+    foreignField: 'parent',
+    // 是否只取一个
+    justOne: false,
+    // 关联表名称
+    ref: 'Category'
+})
+
+schema.virtual('newsList', {
+    localField: '_id',
+    foreignField: 'categories',
+    justOne: false,
+    ref: 'Article'
+})
+
+schema.virtual('heroList', {
+    localField: '_id',
+    foreignField: 'categories',
+    justOne: false,
+    ref: 'Hero'
+})
+
 module.exports = mongoose.model('Category', schema)
