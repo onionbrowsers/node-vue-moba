@@ -95,6 +95,7 @@ module.exports = app => {
     })
 
     router.get('/heros/init', async (req, res) => {
+        await Hero.deleteMany()
         const rawData = [{
             "name": "战士",
             "heros": [{
@@ -561,6 +562,16 @@ module.exports = app => {
             }).limit(10).lean()
         })
         res.send(cats)
+    })
+
+    router.get('/articles/:id', async (req, res) => {
+        const data = await News.findById(req.params.id)
+        res.send(data)
+    })
+
+    router.get('/heros/:id', async (req, res) => {
+        const data = await Hero.findById(req.params.id)
+        res.send(data)
     })
 
     app.use('/web/api', router)

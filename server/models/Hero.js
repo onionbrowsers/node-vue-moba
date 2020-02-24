@@ -12,6 +12,10 @@ const schema = new mongoose.Schema({
     avatar: {
         type: String
     },
+    // 背景图
+    banner: {
+        type: String
+    },
     // 称号
     title: {
         type: String
@@ -74,7 +78,7 @@ const schema = new mongoose.Schema({
         type: String
     },
     // 最佳搭档
-    pattners: [{
+    partners: [{
         hero: {
             type: mongoose.SchemaTypes.ObjectId,
             ref: 'Hero'

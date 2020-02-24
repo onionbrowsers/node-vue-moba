@@ -11,6 +11,13 @@ app.use(require('cors')())
 app.use(express.json())
 // 开放静态文件
 app.use('/uploads', express.static(__dirname + '/uploads'))
+// 后台打包的静态资源
+app.use('/admin', express.static(__dirname + '/admin'))
+// 前台打包的静态资源
+app.use('/web', express.static(__dirname + '/web'))
+// app.use('/', (req, res) => {
+//     res.redirect('/web')
+// })
 
 // 获取数据库
 require('./plugins/db')(app)

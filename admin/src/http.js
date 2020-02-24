@@ -4,8 +4,10 @@ import router from './router/index'
 
 // 设置axios的前缀url
 const http = axios.create({
+    // 添加node环境变量，判断当是开发环境的时候，使用配置的环境变量
+    baseURL: process.env.VUE_APP_API_URL || '/admin/rest',
     // 端口后面的设置根据route中的设置一样即可
-    baseURL: 'http://localhost:3000/admin/rest'
+    // baseURL: 'http://localhost:3000/admin/rest'
 })
 
 // 添加请求拦截器，每次请求接口前将token带给后端

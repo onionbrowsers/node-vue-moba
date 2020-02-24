@@ -22,6 +22,17 @@
                             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                         </el-upload>
                     </el-form-item>
+                    <el-form-item label='背景图'>
+                        <el-upload
+                            class="avatar-uploader"
+                            :action="uploadUrl + '/upload'"
+                            :headers='getAuthHeaders()'
+                            :show-file-list="false"
+                            :on-success="res => $set(this.model, 'banner', res.url)">
+                            <img v-if="model.banner" :src="model.banner" class="avatar">
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        </el-upload>
+                    </el-form-item>
                     <el-form-item label='类型'>
                         <el-select v-model="model.categories" multiple>
                             <el-option
@@ -93,6 +104,29 @@
                         </el-col>
                     </el-row>
                 </el-tab-pane>
+                <el-tab-pane label='最佳搭档' name='partners'>
+                    <el-button type='text' @click="model.partners.push({})" icon='el-icon-plus' :style="{visibility: model.partners.length > 1 ? 'hidden' : 'visible'}">添加搭档</el-button>
+                    <el-row type='flex' style="flex-wrap: wrap">
+                        <el-col :md="12" v-for="(item, index) in model.partners" :key="index">
+                            <el-form-item label='英雄'>
+                                <el-select v-model='item.hero'>
+                                    <el-option
+                                        v-for="hero in heros"
+                                        :key="hero._id"
+                                        :value='hero._id'
+                                        :label='hero.name'>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label='描述'>
+                                <el-input v-model="item.description" type='textarea' :autosize='{minRows: 3}'></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button size='small' type='danger' @click="model.partners.splice(index, 1)">删除</el-button>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-tab-pane>
             </el-tabs>
             <el-form-item style="margin-top: 1rem" class="el-test">
                 <el-button type='primary' native-type='submit'>保存</el-button>
@@ -113,10 +147,12 @@
             return {
                 model: {
                     scores: {},
-                    skills: []
+                    skills: [],
+                    partners: []
                 },
                 categories: [],
-                items: []
+                items: [],
+                heros: []
             }
         },
         created() {
@@ -124,6 +160,7 @@
             this.id && this.fetch()
             this.fetchCategories()
             this.fetchItems()
+            this.fetchHeros()
         },
         // 当新建英雄的时候将原来获取的表单数据清空
         watch: {
@@ -131,7 +168,8 @@
                 if (!val) {
                     this.model = {
                         scores: {},
-                        skills: []
+                        skills: [],
+                        partners: []
                     }
                 }
             }
@@ -142,6 +180,20 @@
             },
             // async await写法
             async save() {
+                if (this.model.skills.length) {
+                    for (let i = 0; i < this.model.skills.length; i++) {
+                        if (JSON.stringify(this.model.skills[i]) === '{}') {
+                            return this.$message.error('请将技能填写完整')
+                        }
+                    }
+                }
+                if (this.model.partners.length) {
+                    for (let i = 0; i < this.model.partners.length; i++) {
+                        if (JSON.stringify(this.model.partners[i]) === '{}') {
+                            return this.$message.error('请将搭档填写完整')
+                        }
+                    }
+                }
                 let res
                 if (this.id) {
                     res = await this.$http.put('heros/' + this.id, this.model)
@@ -154,7 +206,11 @@
             },
             async fetch() {
                 const res = await this.$http.get('heros/' + this.id)
-                this.model = Object.assign(this.model, res.data)
+                // 如果直接object.assign，vue无法监测合并的对象，不能加上get，set
+                for (let prop in res.data) {
+                    this.$set(this.model, prop, res.data[prop])
+                }
+                // this.model = Object.assign(this.model, res.data)
             },
             // 获取分类菜单的下拉数据
             async fetchCategories() {
@@ -169,6 +225,11 @@
             async fetchItems() {
                 const res = await this.$http.get('items/')
                 this.items = res.data
+            },
+            // 获取英雄下拉数据
+            async fetchHeros() {
+                const res = await this.$http.get('heros/')
+                this.heros = res.data
             },
         },
     }

@@ -5,6 +5,7 @@ module.exports = app => {
     // 三个参数，第一个用来判断是否有第一个参数，第二个返回http状态码，第三个是返回错误信息
     const assert = require('http-assert')
     const router = express.Router()
+    const fs = require('fs')
 
     const authMiddleware = require('../../middleware/auth')
 
@@ -24,22 +25,6 @@ module.exports = app => {
     })
     // 获取分类
     router.get('/', async (req, res) => {
-        // 因为不是所有的都有父级分类，所以改为条件选择
-        let queryOptions = {}
-        // 按树形结构返回
-        if (req.Model.modelName === 'Category') {
-            let items = await req.Model.find().populate([
-                {path: 'children'}
-            ]).lean()
-            items = items.filter(item => !item.parent)
-            return res.send(items)
-        } else if (req.Model.modelName === 'Article') {
-            queryOptions.populate = 'categories'
-        } else if (req.Model.modelName === 'Hero') {
-            queryOptions.populate = 'categories'
-        } else {
-            queryOptions = {}
-        }
         // 如果get传参了，并且是article，就返回他的子菜单，heros也是如此
         if (req.query.list) {
             let items
@@ -60,6 +45,22 @@ module.exports = app => {
                     break
             }
             return res.send(items.children)
+        }
+        // 因为不是所有的都有父级分类，所以改为条件选择
+        let queryOptions = {}
+        // 按树形结构返回
+        if (req.Model.modelName === 'Category') {
+            let items = await req.Model.find().populate([
+                {path: 'children'}
+            ]).lean()
+            items = items.filter(item => !item.parent)
+            return res.send(items)
+        } else if (req.Model.modelName === 'Article') {
+            queryOptions.populate = 'categories'
+        } else if (req.Model.modelName === 'Hero') {
+            queryOptions.populate = 'categories'
+        } else {
+            queryOptions = {}
         }
         // 获取分类并且将其父级分类对象形式返回限制50条
         const items = await req.Model.find().setOptions(queryOptions).limit(200)
@@ -123,6 +124,22 @@ module.exports = app => {
         const file = req.file
         file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)
+    })
+
+    // 图片删除接口,传要删除的图片ID，现在还没有用到
+    app.delete('/admin/img/remove', async (req, res) => {
+        fs.unlink(path.join(__dirname, `../../uploads/${req.query.id}`), (err) => {
+            if (err) {
+                return res.send({
+                    message: '删除失败',
+                    success: false
+                })
+            }
+            res.send({
+                message: '成功',
+                success: true
+            })
+        })
     })
 
     // 登录接口

@@ -5,6 +5,8 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    width: auto;
+    height: auto;
 }
 .avatar-uploader .el-upload:hover {
     border-color: #409EFF;

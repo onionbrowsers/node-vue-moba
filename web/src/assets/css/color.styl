@@ -7,6 +7,7 @@ $color = {
     'grey-1': #666666
     'light': #f9f9f9
     'dark-1': #333333
+    'blue': #4394e4
 }
 
 // color
@@ -26,6 +27,11 @@ for key, curColor in $color
 for val in left right center
     .text-{val}
         text-align val
+
+// border 1px
+for val in top right bottom left
+    .border-{val}
+        border-{val} 1px solid #d4d9de
 
 // font-size
 $base-font-size = 1rem
