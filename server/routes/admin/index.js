@@ -122,7 +122,7 @@ module.exports = app => {
     // 接口编写，single是代表上传单张图片，也可.Array上传多张
     app.post('/admin/upload', authMiddleware(), upload.single('file'), async (req, res) => {
         const file = req.file
-        file.url = `http://localhost:3000/uploads/${file.filename}`
+        file.url = `http://test.hxweb.top:3000/uploads/${file.filename}`
         res.send(file)
     })
 
